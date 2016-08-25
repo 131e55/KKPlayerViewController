@@ -195,7 +195,16 @@ public class KKPlayerViewController: UIViewController {
 
     public var minimumBufferDuration: Double = 5.0
 
-    public weak var delegate: KKPlayerViewControllerDelegate?
+    public weak var delegate: KKPlayerViewControllerDelegate? {
+
+        didSet {
+
+            if #available(iOS 9.0, *) {
+
+                self.avPlayerViewController.delegate = self.delegate
+            }
+        }
+    }
 
     // MARK: Private properties
 
@@ -204,7 +213,7 @@ public class KKPlayerViewController: UIViewController {
     private var playerItem: AVPlayerItem?
 
     // AVPlayerViewController.player paused by AVPlayerViewController when going into the background.
-    // So, on the background, detach the reference from AVPlayerViewController.
+    // So, on the background, remove the reference from AVPlayerViewController.
     private var player: AVPlayer? {
 
         didSet {
@@ -268,11 +277,6 @@ public class KKPlayerViewController: UIViewController {
         self.avPlayerViewController.didMoveToParentViewController(self)
 
         self.backgroundColor = UIColor.blackColor()
-
-        if #available(iOS 9.0, *) {
-
-            self.avPlayerViewController.delegate = self.delegate
-        }
 
         self.avPlayerViewController.addObserver(
             self,
@@ -612,11 +616,33 @@ public class KKPlayerViewController: UIViewController {
 
     func applicationDidEnterBackground(notification: NSNotification) {
 
-        self.avPlayerViewController.player = nil
+        func remove() {
+
+            // Remove the reference from AVPlayerViewController for background playback
+            self.avPlayerViewController.player = nil
+        }
+
+        if #available(iOS 9.0, *) {
+
+            if AVPictureInPictureController.isPictureInPictureSupported()
+                && self.allowsPictureInPicturePlayback {
+
+                // Do nothing. Keep the reference from AVPlayerViewController for Picture in Picture.
+            }
+            else {
+
+                remove()
+            }
+        }
+        else {
+
+            remove()
+        }
     }
 
     func applicationWillEnterForeground(notification: NSNotification) {
 
+        // Refer again for case of background playback
         self.avPlayerViewController.player = self.player
     }
 
