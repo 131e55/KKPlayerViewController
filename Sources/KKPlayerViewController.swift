@@ -148,6 +148,7 @@ public class KKPlayerViewController: UIViewController {
     }
 
     public var videoGravity: String {
+
         get {
 
             return self.avPlayerViewController.videoGravity
