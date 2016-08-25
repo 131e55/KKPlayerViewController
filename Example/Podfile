@@ -1,0 +1,5 @@
+use_frameworks!
+
+target 'KKPlayerViewController_Example' do
+  pod 'KKPlayerViewController', :path => '../'
+end

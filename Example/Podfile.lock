@@ -1,0 +1,16 @@
+PODS:
+  - KKPlayerViewController (0.1)
+
+DEPENDENCIES:
+  - KKPlayerViewController (from `../`)
+
+EXTERNAL SOURCES:
+  KKPlayerViewController:
+    :path: ../
+
+SPEC CHECKSUMS:
+  KKPlayerViewController: aee8a99dea56ab47a4b4fdcf896b040650315d21
+
+PODFILE CHECKSUM: 5fc5734665816bfd31898776e074032fe1d4fac3
+
+COCOAPODS: 1.0.1
