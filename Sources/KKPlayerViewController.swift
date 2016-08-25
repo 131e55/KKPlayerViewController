@@ -159,6 +159,14 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
+    public var backgroundColor: UIColor = UIColor.blackColor() {
+
+        didSet {
+            self.view.backgroundColor = self.backgroundColor
+            self.avPlayerViewController.view.backgroundColor = self.backgroundColor
+        }
+    }
+
     public var duration: Double {
 
         return CMTimeGetSeconds(self.player?.currentItem?.duration ?? kCMTimeZero)
@@ -258,6 +266,8 @@ public class KKPlayerViewController: UIViewController {
         self.addChildViewController(self.avPlayerViewController)
         self.view.addSubview(self.avPlayerViewController.view)
         self.avPlayerViewController.didMoveToParentViewController(self)
+
+        self.backgroundColor = UIColor.blackColor()
 
         if #available(iOS 9.0, *) {
 
