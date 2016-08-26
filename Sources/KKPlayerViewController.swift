@@ -167,6 +167,12 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
+    public var videoNaturalSize: CGSize {
+
+        return self.player?.currentItem?.asset
+            .tracksWithMediaType(AVMediaTypeVideo).first?.naturalSize ?? CGSizeZero
+    }
+
     public var duration: Double {
 
         return CMTimeGetSeconds(self.player?.currentItem?.duration ?? kCMTimeZero)
@@ -359,7 +365,7 @@ public class KKPlayerViewController: UIViewController {
 
         self.asset = AVURLAsset(URL: url, options: nil)
 
-        let keys = ["playable", "duration"]
+        let keys = ["playable", "duration", "tracks"]
 
         self.asset!.loadValuesAsynchronouslyForKeys(
             keys,
