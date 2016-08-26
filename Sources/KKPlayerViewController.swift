@@ -32,7 +32,7 @@ import AVKit
 
 // MARK: Public enumerations
 
-public enum PlayerStatus: Int, CustomStringConvertible {
+@objc public enum PlayerStatus: Int, CustomStringConvertible {
 
     case Unknown
     case ReadyToPlay
@@ -49,7 +49,7 @@ public enum PlayerStatus: Int, CustomStringConvertible {
     }
 }
 
-public enum PlaybackStatus: Int, CustomStringConvertible {
+@objc public enum PlaybackStatus: Int, CustomStringConvertible {
 
     case Unstarted
     case Playing
@@ -72,11 +72,13 @@ public enum PlaybackStatus: Int, CustomStringConvertible {
 
 // MARK: - Public KKPlayerViewControllerDelegate protocol
 
-public protocol KKPlayerViewControllerDelegate: AVPlayerViewControllerDelegate {
+@objc public protocol KKPlayerViewControllerDelegate: AVPlayerViewControllerDelegate {
 
     func playerViewControllerDidChangePlayerStatus(playerViewController: KKPlayerViewController, status: PlayerStatus)
     func playerViewControllerDidChangePlaybackStatus(playerViewController: KKPlayerViewController, status: PlaybackStatus)
     func playerViewControllerDidReadyForDisplay(playerViewController: KKPlayerViewController)
+
+    optional func playerViewControllerDidChangeCurrentTime(playerViewController: KKPlayerViewController, currentTime: Double)
 }
 
 // MARK: - Public KKPlayerViewController class
@@ -201,6 +203,10 @@ public class KKPlayerViewController: UIViewController {
 
     public var minimumBufferDuration: Double = 5.0
 
+    /// The interval of calling playerViewControllerDidChangeCurrentTime delegate method.
+    /// Specify the value as milliseconds.
+    public var intervalOfTimeObservation: Int = 500
+
     public weak var delegate: KKPlayerViewControllerDelegate? {
 
         didSet {
@@ -228,6 +234,8 @@ public class KKPlayerViewController: UIViewController {
             self.player?.volume = self.volume
         }
     }
+
+    private var timeObserver: AnyObject?
 
     // MARK: Initialization methods
 
@@ -466,6 +474,22 @@ public class KKPlayerViewController: UIViewController {
             options: ([.New]),
             context: &kkPlayerViewControllerObservationContext
         )
+
+        let interval = CMTimeMake(1, 1000 / Int32(self.intervalOfTimeObservation))
+        self.timeObserver = player.addPeriodicTimeObserverForInterval(
+            interval,
+            queue: dispatch_get_main_queue(),
+            usingBlock: { [weak self] time in
+
+                guard let `self` = self else {
+
+                    return
+                }
+
+                let currentTime = CMTimeGetSeconds(time)
+                self.delegate?.playerViewControllerDidChangeCurrentTime?(self, currentTime: currentTime)
+            }
+        )
     }
 
     private func removePlayerObservers(player: AVPlayer) {
@@ -480,6 +504,9 @@ public class KKPlayerViewController: UIViewController {
             forKeyPath: playerRateKey,
             context: &kkPlayerViewControllerObservationContext
         )
+
+        player.removeTimeObserver(self.timeObserver!)
+        self.timeObserver = nil
     }
 
     // MARK: KVO
