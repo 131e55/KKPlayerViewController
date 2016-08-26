@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'KKPlayerViewController'
   s.version          = '0.1'
-  s.summary          = 'Easy to use AVPlayerViewController.'
+  s.summary          = 'A video player library written in Swift for easier and more convenient to use AVPlayerViewController'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -18,7 +18,15 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-                       Easy to use AVPlayerViewController.
+                       KKPlayerViewController is a video player library for easier and more convenient to use AVPlayerViewController.
+                       - Simple API
+                       - Load video data asynchronously
+                       - Easily manage playback status
+                       - Background playback
+                       - AVPlayerViewController features
+                       ----- System playback controls
+                       ----- Picture in Picture (iPad, iOS 9.0+)
+                       - And more
                        DESC
 
   s.homepage         = 'https://github.com/131e55/KKPlayerViewController'
