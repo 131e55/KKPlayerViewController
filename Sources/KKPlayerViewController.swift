@@ -336,11 +336,16 @@ public class KKPlayerViewController: UIViewController {
         self.setupAsset(url)
     }
 
-    public func play() {
+    public func play(from seconds: Double? = nil) {
 
         guard let player = self.player else {
 
             return
+        }
+
+        if let seconds = seconds {
+
+            self.seek(to: seconds)
         }
         
         player.play()
