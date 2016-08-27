@@ -356,14 +356,17 @@ public class KKPlayerViewController: UIViewController {
         player.pause()
     }
 
-    public func seek(to: Double) {
+    public func seek(to seconds: Double) {
 
         guard let player = self.player else {
 
             return
         }
 
-        let time = CMTime(seconds: to, preferredTimescale: Int32(NSEC_PER_SEC))
+        let time = CMTime(
+            seconds: seconds,
+            preferredTimescale: Int32(NSEC_PER_SEC)
+        )
         player.seekToTime(time)
     }
 
