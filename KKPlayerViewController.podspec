@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'KKPlayerViewController'
-  s.version          = '0.3'
+  s.version          = '0.4'
   s.summary          = 'A video player library written in Swift for easier and more convenient to use AVPlayerViewController'
 
 # This description is used to generate tags and improve search results.
