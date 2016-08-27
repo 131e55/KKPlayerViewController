@@ -32,6 +32,7 @@ import AVKit
 
 // MARK: Public enumerations
 
+/// PlayerStatus is a wrapper of [AVPlayerStatus](https://developer.apple.com/reference/avfoundation/avplayerstatus).
 @objc public enum PlayerStatus: Int, CustomStringConvertible {
 
     case Unknown
@@ -49,6 +50,19 @@ import AVKit
     }
 }
 
+/**
+ PlaybackStatus indicates playback status of current item.
+ 
+ Unstarted: Not yet started playback or Not set any player item.
+
+ Playing: The current player item is playing.
+ 
+ Paused: The current player item is paused.
+ 
+ Ended: The current player item is ended.
+ 
+ Stalled: The player can not continue to playback because bufferred data is not enough.
+*/
 @objc public enum PlaybackStatus: Int, CustomStringConvertible {
 
     case Unstarted
