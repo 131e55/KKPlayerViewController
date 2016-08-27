@@ -220,7 +220,7 @@ public class KKPlayerViewController: UIViewController {
 
     // MARK: Private properties
 
-    private var avPlayerViewController: AVPlayerViewController!
+    private var avPlayerViewController = AVPlayerViewController()
     private var asset: AVAsset?
     private var playerItem: AVPlayerItem?
 
@@ -258,6 +258,13 @@ public class KKPlayerViewController: UIViewController {
 
     private func commonInit() {
 
+        self.avPlayerViewController.addObserver(
+            self,
+            forKeyPath: avPlayerViewControllerReadyForDisplayKey,
+            options: [.New],
+            context: &kkPlayerViewControllerObservationContext
+        )
+
         self.addApplicationNotificationObservers()
 
         UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
@@ -283,7 +290,7 @@ public class KKPlayerViewController: UIViewController {
     public override func loadView() {
 
         self.view = UIView()
-        self.avPlayerViewController = AVPlayerViewController()
+
         self.avPlayerViewController.showsPlaybackControls = false
         self.avPlayerViewController.view.frame = self.view.bounds
         self.addChildViewController(self.avPlayerViewController)
@@ -291,13 +298,6 @@ public class KKPlayerViewController: UIViewController {
         self.avPlayerViewController.didMoveToParentViewController(self)
 
         self.backgroundColor = UIColor.blackColor()
-
-        self.avPlayerViewController.addObserver(
-            self,
-            forKeyPath: avPlayerViewControllerReadyForDisplayKey,
-            options: [.New],
-            context: &kkPlayerViewControllerObservationContext
-        )
     }
 
     // MARK: Public methods
