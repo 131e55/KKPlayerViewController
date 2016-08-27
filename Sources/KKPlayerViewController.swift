@@ -378,6 +378,7 @@ public class KKPlayerViewController: UIViewController {
         self.asset!.loadValuesAsynchronouslyForKeys(
             keys,
             completionHandler: { [weak self] in
+
                 guard let `self` = self, asset = self.asset else {
 
                     return
@@ -385,10 +386,12 @@ public class KKPlayerViewController: UIViewController {
 
                 var error: NSError?
                 let failed = keys.filter {
+
                     asset.statusOfValueForKey($0, error: &error) == .Failed
                 }
 
                 guard failed.isEmpty else {
+
                     self.playerStatus = .Failed
                     return
                 }
