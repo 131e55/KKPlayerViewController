@@ -201,6 +201,9 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
+    /// Specifies whether the player automatically repeats if playback is ended.
+    public var repeatPlayback: Bool = false
+
     public var minimumBufferDuration: Double = 5.0
 
     /// The interval of calling playerViewControllerDidChangeCurrentTime delegate method.
@@ -619,6 +622,11 @@ public class KKPlayerViewController: UIViewController {
     public func playerItemDidPlayToEndTime(notification: NSNotification) {
 
         self.playbackStatus = .Ended
+
+        if self.repeatPlayback {
+
+            self.play(from: 0)
+        }
     }
 
     public func playerItemPlaybackStalled(notification: NSNotification) {
