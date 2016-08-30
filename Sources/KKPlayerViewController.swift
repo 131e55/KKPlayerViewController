@@ -481,11 +481,22 @@ public class KKPlayerViewController: UIViewController {
     private func setupPlayer(playerItem: AVPlayerItem) {
 
         self.player = AVPlayer()
-        self.avPlayerViewController.player = self.player
 
         self.addPlayerObservers(self.player!)
 
         self.player!.replaceCurrentItemWithPlayerItem(playerItem)
+
+        dispatch_async(
+            dispatch_get_main_queue(), { [weak self] in
+
+                guard let `self` = self, player = self.player else {
+
+                    return
+                }
+
+                self.avPlayerViewController.player = player
+            }
+        )
     }
 
     private func addPlayerObservers(player: AVPlayer) {
