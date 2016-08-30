@@ -347,7 +347,7 @@ public class KKPlayerViewController: UIViewController {
         self.playbackStatus = .Unstarted
     }
 
-    public func setup(url: NSURL) {
+    public func load(url: NSURL) {
 
         self.clear()
         self.setupAsset(url)
