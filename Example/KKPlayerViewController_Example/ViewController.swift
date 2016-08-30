@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         let playerViewController = self.childViewControllers.first as! KKPlayerViewController
         playerViewController.backgroundColor = UIColor.clearColor()
         playerViewController.delegate = self
-        playerViewController.setup(self.url)
+        playerViewController.load(self.url)
 
         // Prepare for background playback or Picture in Picture
         let audioSession = AVAudioSession.sharedInstance()
