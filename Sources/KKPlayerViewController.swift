@@ -29,6 +29,7 @@
 
 import AVFoundation
 import AVKit
+import MediaPlayer
 
 // MARK: Public enumerations
 
@@ -123,55 +124,55 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
-    public var showsPlaybackControls: Bool {
+//    public var showsPlaybackControls: Bool {
+//
+//        get {
+//
+//            return self.avPlayerViewController.showsPlaybackControls
+//        }
+//        set {
+//
+//            self.avPlayerViewController.showsPlaybackControls = newValue
+//        }
+//    }
 
-        get {
+//    @available(iOS 9.0, *)
+//    public var allowsPictureInPicturePlayback: Bool {
+//
+//        get {
+//
+//            return self.avPlayerViewController.allowsPictureInPicturePlayback
+//        }
+//        set {
+//
+//            self.avPlayerViewController.allowsPictureInPicturePlayback = newValue
+//        }
+//    }
 
-            return self.avPlayerViewController.showsPlaybackControls
-        }
-        set {
-
-            self.avPlayerViewController.showsPlaybackControls = newValue
-        }
-    }
-
-    @available(iOS 9.0, *)
-    public var allowsPictureInPicturePlayback: Bool {
-
-        get {
-
-            return self.avPlayerViewController.allowsPictureInPicturePlayback
-        }
-        set {
-
-            self.avPlayerViewController.allowsPictureInPicturePlayback = newValue
-        }
-    }
-
-    public var contentOverlayView: UIView? {
-
-        return self.avPlayerViewController.contentOverlayView
-    }
-
+//    public var contentOverlayView: UIView? {
+//
+//        return self.avPlayerViewController.contentOverlayView
+//    }
+//
     public var readyForDisplay: Bool {
 
-        return self.avPlayerViewController.readyForDisplay
+        return self.playerView.playerLayer.readyForDisplay
     }
 
     public var videoBounds: CGRect {
 
-        return self.avPlayerViewController.videoBounds
+        return self.playerView.playerLayer.videoRect
     }
 
     public var videoGravity: String {
 
         get {
 
-            return self.avPlayerViewController.videoGravity
+            return self.playerView.playerLayer.videoGravity
         }
         set {
 
-            self.avPlayerViewController.videoGravity = newValue
+            self.playerView.playerLayer.videoGravity = newValue
         }
     }
 
@@ -179,7 +180,6 @@ public class KKPlayerViewController: UIViewController {
 
         didSet {
             self.view.backgroundColor = self.backgroundColor
-            self.avPlayerViewController.view.backgroundColor = self.backgroundColor
         }
     }
 
@@ -230,19 +230,16 @@ public class KKPlayerViewController: UIViewController {
 
             if #available(iOS 9.0, *) {
 
-                self.avPlayerViewController.delegate = self.delegate
+//                self.avPlayerViewController.delegate = self.delegate
             }
         }
     }
 
     // MARK: Private properties
 
-    private var avPlayerViewController = AVPlayerViewController()
     private var asset: AVAsset?
     private var playerItem: AVPlayerItem?
 
-    // AVPlayerViewController.player paused by AVPlayerViewController when going into the background.
-    // So, on the background, remove the reference from AVPlayerViewController.
     private var player: AVPlayer? {
 
         didSet {
@@ -252,7 +249,26 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
+    private var playerView: KKPlayerView {
+
+        return self.view as! KKPlayerView
+    }
+
     private var timeObserver: AnyObject?
+
+    private var _pictureInPictureController: AnyObject?
+    @available(iOS 9.0, *)
+    private var pictureInPictureController: AVPictureInPictureController? {
+
+        get {
+
+            return self._pictureInPictureController as? AVPictureInPictureController
+        }
+        set {
+
+            self._pictureInPictureController = newValue
+        }
+    }
 
     // MARK: Initialization methods
 
@@ -275,46 +291,47 @@ public class KKPlayerViewController: UIViewController {
 
     private func commonInit() {
 
-        self.avPlayerViewController.addObserver(
-            self,
-            forKeyPath: avPlayerViewControllerReadyForDisplayKey,
-            options: [.New],
-            context: &kkPlayerViewControllerObservationContext
-        )
-
         self.addApplicationNotificationObservers()
-
-        UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
     }
 
     deinit {
 
-        self.avPlayerViewController.removeObserver(
+        self.playerView.playerLayer.removeObserver(
             self,
-            forKeyPath: avPlayerViewControllerReadyForDisplayKey,
+            forKeyPath: playerLayerReadyForDisplayKey,
             context: &kkPlayerViewControllerObservationContext
         )
 
         self.clear()
 
         self.removeApplicationNotificationObservers()
-
-        UIApplication.sharedApplication().endReceivingRemoteControlEvents()
     }
 
     // MARK: UIViewController
 
     public override func loadView() {
 
-        self.view = UIView()
+        let bundle = NSBundle(forClass: self.dynamicType)
+        let nib = UINib(nibName: "\(self.dynamicType)", bundle: bundle)
+        self.view = nib.instantiateWithOwner(self, options: nil).first as! KKPlayerView
 
-        self.avPlayerViewController.showsPlaybackControls = false
-        self.avPlayerViewController.view.frame = self.view.bounds
-        self.addChildViewController(self.avPlayerViewController)
-        self.view.addSubview(self.avPlayerViewController.view)
-        self.avPlayerViewController.didMoveToParentViewController(self)
+        self.playerView.playerLayer.addObserver(
+            self,
+            forKeyPath: playerLayerReadyForDisplayKey,
+            options: [.New],
+            context: &kkPlayerViewControllerObservationContext
+        )
+    }
 
-        self.backgroundColor = UIColor.blackColor()
+    public override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+
+        UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
+        self.becomeFirstResponder()
+    }
+
+    public override func canBecomeFirstResponder() -> Bool {
+        return true
     }
 
     // MARK: Public methods
@@ -341,7 +358,6 @@ public class KKPlayerViewController: UIViewController {
         }
 
         self.player = nil
-        self.avPlayerViewController.player = nil
 
         self.playerStatus = .Unknown
         self.playbackStatus = .Unstarted
@@ -494,7 +510,7 @@ public class KKPlayerViewController: UIViewController {
                     return
                 }
 
-                self.avPlayerViewController.player = player
+                self.playerView.player = player
             }
         )
     }
@@ -623,19 +639,19 @@ public class KKPlayerViewController: UIViewController {
                 }
             }
             
-        case avPlayerViewControllerReadyForDisplayKey:
-            
-            guard let avPlayerViewController = object as? AVPlayerViewController
-                where self.avPlayerViewController == avPlayerViewController else {
+        case playerLayerReadyForDisplayKey:
+
+            guard let playerLayer = object as? AVPlayerLayer
+                where self.playerView.playerLayer == playerLayer else {
 
                 fatalError()
             }
-            
-            if avPlayerViewController.readyForDisplay {
+
+            if playerLayer.readyForDisplay {
                 
                 self.delegate?.playerViewControllerDidReadyForDisplay(self)
             }
-            
+
         default:
             
             fatalError()
@@ -692,17 +708,18 @@ public class KKPlayerViewController: UIViewController {
     }
 
     func applicationDidEnterBackground(notification: NSNotification) {
+        print(self.playerView.playerLayer.videoRect)
+        print(self.videoNaturalSize)
 
         func remove() {
 
-            // Remove the reference from AVPlayerViewController for background playback
-            self.avPlayerViewController.player = nil
+            self.playerView.player = nil
         }
 
         if #available(iOS 9.0, *) {
 
-            if AVPictureInPictureController.isPictureInPictureSupported()
-                && self.allowsPictureInPicturePlayback {
+            if AVPictureInPictureController.isPictureInPictureSupported() {
+//                && self.allowsPictureInPicturePlayback {
 
                 // Do nothing. Keep the reference from AVPlayerViewController for Picture in Picture.
             }
@@ -715,49 +732,53 @@ public class KKPlayerViewController: UIViewController {
 
             remove()
         }
+
+        print("didEnter")
     }
 
     func applicationWillEnterForeground(notification: NSNotification) {
 
         // Refer again for case of background playback
-        self.avPlayerViewController.player = self.player
+        self.playerView.player = self.player
     }
 
     // MARK: Remote control
-
-    override public func remoteControlReceivedWithEvent(event: UIEvent?) {
-
-        guard let event = event
-            where event.type == .RemoteControl else {
-
-            return
-        }
-
-        switch event.subtype {
-
-        case .RemoteControlPause,
-             .RemoteControlPlay,
-             .RemoteControlTogglePlayPause:
-
-            guard let player = self.player else {
-
-                return
-            }
-
-            if playbackStatus == .Playing {
-
-                player.pause()
-            }
-            else if playbackStatus == .Paused {
-
-                player.play()
-            }
-            
-        default:
-            
-            break
-        }
-    }
+//
+//    override public func remoteControlReceivedWithEvent(event: UIEvent?) {
+//
+//        guard let event = event
+//            where event.type == .RemoteControl else {
+//
+//            return
+//        }
+//
+//        print(event)
+//
+//        switch event.subtype {
+//
+//        case .RemoteControlPause,
+//             .RemoteControlPlay,
+//             .RemoteControlTogglePlayPause:
+//
+//            guard let player = self.player else {
+//
+//                return
+//            }
+//
+//            if playbackStatus == .Playing {
+//
+//                player.pause()
+//            }
+//            else if playbackStatus == .Paused {
+//
+//                player.play()
+//            }
+//            
+//        default:
+//            
+//            break
+//        }
+//    }
 }
 
 // MARK: Private KVO keys
@@ -766,4 +787,4 @@ private var kkPlayerViewControllerObservationContext = 0
 private let playerItemLoadedTimeRangesKey = "loadedTimeRanges"
 private let playerStatusKey = "status"
 private let playerRateKey = "rate"
-private let avPlayerViewControllerReadyForDisplayKey = "readyForDisplay"
+private let playerLayerReadyForDisplayKey = "readyForDisplay"

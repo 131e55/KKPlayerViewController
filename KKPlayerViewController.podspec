@@ -39,10 +39,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '8.0'
 
   s.source_files = 'Sources/**/*.swift'
-
-  # s.resource_bundles = {
-  #   'KKPlayerViewController' => ['KKPlayerViewController/Assets/*.png']
-  # }
+  s.resource = 'Resources/*.xib'
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
