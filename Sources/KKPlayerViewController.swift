@@ -191,12 +191,16 @@ public class KKPlayerViewController: UIViewController {
 
     public var duration: Double {
 
-        return CMTimeGetSeconds(self.player?.currentItem?.duration ?? kCMTimeZero)
+        let duration = CMTimeGetSeconds(self.player?.currentItem?.duration ?? kCMTimeZero)
+
+        return duration.isFinite ? duration : 0
     }
 
     public var currentTime: Double {
 
-        return CMTimeGetSeconds(self.player?.currentTime() ?? kCMTimeZero)
+        let currentTime = CMTimeGetSeconds(self.player?.currentTime() ?? kCMTimeZero)
+
+        return currentTime.isFinite ? currentTime : 0
     }
 
     public var muted: Bool = false {
