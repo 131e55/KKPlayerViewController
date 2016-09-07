@@ -437,7 +437,13 @@ public class KKPlayerViewController: UIViewController {
                     return
                 }
 
-                self.setupPlayerItem(asset)
+                dispatch_async(
+
+                    dispatch_get_main_queue(), { [weak self] in
+
+                        self.setupPlayerItem(asset)
+                    }
+                )
             }
         )
     }
@@ -502,17 +508,7 @@ public class KKPlayerViewController: UIViewController {
 
         self.player!.replaceCurrentItemWithPlayerItem(playerItem)
 
-        dispatch_async(
-            dispatch_get_main_queue(), { [weak self] in
-
-                guard let `self` = self, player = self.player else {
-
-                    return
-                }
-
-                self.playerView.player = player
-            }
-        )
+        self.playerView.player = player
     }
 
     private func addPlayerObservers(player: AVPlayer) {
@@ -648,7 +644,8 @@ public class KKPlayerViewController: UIViewController {
             }
 
             if playerLayer.readyForDisplay {
-                
+                print(self.videoBounds)
+                print(self.videoNaturalSize)
                 self.delegate?.playerViewControllerDidReadyForDisplay(self)
             }
 
@@ -708,8 +705,6 @@ public class KKPlayerViewController: UIViewController {
     }
 
     func applicationDidEnterBackground(notification: NSNotification) {
-        print(self.playerView.playerLayer.videoRect)
-        print(self.videoNaturalSize)
 
         func remove() {
 
@@ -732,8 +727,6 @@ public class KKPlayerViewController: UIViewController {
 
             remove()
         }
-
-        print("didEnter")
     }
 
     func applicationWillEnterForeground(notification: NSNotification) {
