@@ -274,6 +274,8 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
+    private var observationContext = 0
+
     // MARK: Initialization methods
 
     public convenience init() {
@@ -303,7 +305,7 @@ public class KKPlayerViewController: UIViewController {
         self.playerView.playerLayer.removeObserver(
             self,
             forKeyPath: playerLayerReadyForDisplayKey,
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
 
         self.clear()
@@ -323,7 +325,7 @@ public class KKPlayerViewController: UIViewController {
             self,
             forKeyPath: playerLayerReadyForDisplayKey,
             options: [.New],
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
     }
 
@@ -445,7 +447,7 @@ public class KKPlayerViewController: UIViewController {
 
                     dispatch_get_main_queue(), { [weak self] in
 
-                        self.setupPlayerItem(asset)
+                        self?.setupPlayerItem(asset)
                     }
                 )
             }
@@ -467,7 +469,7 @@ public class KKPlayerViewController: UIViewController {
             self,
             forKeyPath: playerItemLoadedTimeRangesKey,
             options: ([.New]),
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
 
         NSNotificationCenter.defaultCenter().addObserver(
@@ -489,7 +491,7 @@ public class KKPlayerViewController: UIViewController {
         playerItem.removeObserver(
             self,
             forKeyPath: playerItemLoadedTimeRangesKey,
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
 
         NSNotificationCenter.defaultCenter().removeObserver(
@@ -521,13 +523,13 @@ public class KKPlayerViewController: UIViewController {
             self,
             forKeyPath: playerStatusKey,
             options: ([.New]),
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
         player.addObserver(
             self,
             forKeyPath: playerRateKey,
             options: ([.New]),
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
 
         let interval = CMTimeMake(1, 1000 / Int32(self.intervalOfTimeObservation))
@@ -552,12 +554,12 @@ public class KKPlayerViewController: UIViewController {
         player.removeObserver(
             self,
             forKeyPath: playerStatusKey,
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
         player.removeObserver(
             self,
             forKeyPath: playerRateKey,
-            context: &kkPlayerViewControllerObservationContext
+            context: &self.observationContext
         )
 
         player.removeTimeObserver(self.timeObserver!)
@@ -568,7 +570,7 @@ public class KKPlayerViewController: UIViewController {
 
     public override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
 
-        guard context == &kkPlayerViewControllerObservationContext else {
+        guard context == &self.observationContext else {
 
             super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
             return
@@ -780,7 +782,6 @@ public class KKPlayerViewController: UIViewController {
 
 // MARK: Private KVO keys
 
-private var kkPlayerViewControllerObservationContext = 0
 private let playerItemLoadedTimeRangesKey = "loadedTimeRanges"
 private let playerStatusKey = "status"
 private let playerRateKey = "rate"
