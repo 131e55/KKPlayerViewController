@@ -364,6 +364,7 @@ public class KKPlayerViewController: UIViewController {
         }
 
         self.player = nil
+        self.playerView.player = nil
 
         self.playerStatus = .Unknown
         self.playbackStatus = .Unstarted
@@ -650,8 +651,7 @@ public class KKPlayerViewController: UIViewController {
             }
 
             if playerLayer.readyForDisplay {
-                print(self.videoBounds)
-                print(self.videoNaturalSize)
+
                 self.delegate?.playerViewControllerDidReadyForDisplay(self)
             }
 
