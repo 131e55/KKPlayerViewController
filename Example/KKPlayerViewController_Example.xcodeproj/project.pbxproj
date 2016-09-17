@@ -123,6 +123,8 @@
 				TargetAttributes = {
 					437ECDCA1D6EAC990030ABF4 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 7462AJ4VTX;
+						LastSwiftMigration = 0800;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
 								enabled = 1;
@@ -332,11 +334,13 @@
 			baseConfigurationReference = 74DE05B57B6DF986C8DC9490 /* Pods-KKPlayerViewController_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7462AJ4VTX;
 				INFOPLIST_FILE = KKPlayerViewController_Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "me.131e55.KKPlayerViewController-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -345,11 +349,13 @@
 			baseConfigurationReference = C6CACAE0A3B5AD1675308FC5 /* Pods-KKPlayerViewController_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7462AJ4VTX;
 				INFOPLIST_FILE = KKPlayerViewController_Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "me.131e55.KKPlayerViewController-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

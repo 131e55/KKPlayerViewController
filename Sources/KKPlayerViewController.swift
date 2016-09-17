@@ -36,17 +36,17 @@ import MediaPlayer
 /// PlayerStatus is a wrapper of [AVPlayerStatus](https://developer.apple.com/reference/avfoundation/avplayerstatus).
 @objc public enum PlayerStatus: Int, CustomStringConvertible {
 
-    case Unknown
-    case ReadyToPlay
-    case Failed
+    case unknown
+    case readyToPlay
+    case failed
 
     public var description: String {
 
         switch self {
 
-        case .Unknown:     return "Unknown"
-        case .ReadyToPlay: return "ReadyToPlay"
-        case .Failed:      return "Failed"
+        case .unknown:     return "unknown"
+        case .readyToPlay: return "readyToPlay"
+        case .failed:      return "failed"
         }
     }
 }
@@ -54,33 +54,33 @@ import MediaPlayer
 /**
  PlaybackStatus indicates playback status of current item.
  
- Unstarted: Not yet started playback or Not set any player item.
+ unstarted: Not yet started playback or Not set any player item.
 
- Playing: The current player item is playing.
+ playing: The current player item is playing.
+
+ paused: The current player item is paused.
  
- Paused: The current player item is paused.
+ ended: The current player item is ended.
  
- Ended: The current player item is ended.
- 
- Stalled: The player can not continue to playback because bufferred data is not enough.
+ stalled: The player can not continue to playback because bufferred data is not enough.
 */
 @objc public enum PlaybackStatus: Int, CustomStringConvertible {
 
-    case Unstarted
-    case Playing
-    case Paused
-    case Ended
-    case Stalled
+    case unstarted
+    case playing
+    case paused
+    case ended
+    case stalled
 
     public var description: String {
 
         switch self {
 
-        case .Unstarted: return "Unstarted"
-        case .Playing:   return "Playing"
-        case .Paused:    return "Paused"
-        case .Ended:     return "Ended"
-        case .Stalled:   return "Stalled"
+        case .unstarted: return "unstarted"
+        case .playing:   return "playing"
+        case .paused:    return "paused"
+        case .ended:     return "ended"
+        case .stalled:   return "stalled"
         }
     }
 }
@@ -89,82 +89,53 @@ import MediaPlayer
 
 @objc public protocol KKPlayerViewControllerDelegate: AVPlayerViewControllerDelegate {
 
-    func playerViewControllerDidChangePlayerStatus(playerViewController: KKPlayerViewController, status: PlayerStatus)
-    func playerViewControllerDidChangePlaybackStatus(playerViewController: KKPlayerViewController, status: PlaybackStatus)
-    func playerViewControllerDidReadyForDisplay(playerViewController: KKPlayerViewController)
+    func playerViewController(_ playerViewController: KKPlayerViewController, didChangePlayerStatus status: PlayerStatus)
+    func playerViewController(_ playerViewController: KKPlayerViewController, didChangePlaybackStatus status: PlaybackStatus)
+    func playerViewControllerDidReadyForDisplay(_ playerViewController: KKPlayerViewController)
 
-    optional func playerViewControllerDidChangeCurrentTime(playerViewController: KKPlayerViewController, currentTime: Double)
+    @objc optional func playerViewController(_ playerViewController: KKPlayerViewController, didChangeCurrentTime time: Double)
 }
 
 // MARK: - Public KKPlayerViewController class
 
-public class KKPlayerViewController: UIViewController {
+open class KKPlayerViewController: UIViewController {
 
     // MARK: Public properties
 
-    private(set) public var playerStatus: PlayerStatus = .Unknown {
+    private(set) open var playerStatus: PlayerStatus = .unknown {
 
         didSet {
 
             if self.playerStatus != oldValue {
 
-                self.delegate?.playerViewControllerDidChangePlayerStatus(self, status: playerStatus)
+
+                self.delegate?.playerViewController(self, didChangePlayerStatus: self.playerStatus)
             }
         }
     }
 
-    private(set) public var playbackStatus: PlaybackStatus = .Unstarted {
+    private(set) open var playbackStatus: PlaybackStatus = .unstarted {
 
         didSet {
 
             if self.playbackStatus != oldValue {
 
-                self.delegate?.playerViewControllerDidChangePlaybackStatus(self, status: playbackStatus)
+                self.delegate?.playerViewController(self, didChangePlaybackStatus: self.playbackStatus)
             }
         }
     }
 
-//    public var showsPlaybackControls: Bool {
-//
-//        get {
-//
-//            return self.avPlayerViewController.showsPlaybackControls
-//        }
-//        set {
-//
-//            self.avPlayerViewController.showsPlaybackControls = newValue
-//        }
-//    }
+    open var readyForDisplay: Bool {
 
-//    @available(iOS 9.0, *)
-//    public var allowsPictureInPicturePlayback: Bool {
-//
-//        get {
-//
-//            return self.avPlayerViewController.allowsPictureInPicturePlayback
-//        }
-//        set {
-//
-//            self.avPlayerViewController.allowsPictureInPicturePlayback = newValue
-//        }
-//    }
-
-//    public var contentOverlayView: UIView? {
-//
-//        return self.avPlayerViewController.contentOverlayView
-//    }
-//
-    public var readyForDisplay: Bool {
-
-        return self.playerView.playerLayer.readyForDisplay
+        return self.playerView.playerLayer.isReadyForDisplay
     }
 
-    public var videoBounds: CGRect {
+    open var videoRect: CGRect {
 
         return self.playerView.playerLayer.videoRect
     }
 
-    public var videoGravity: String {
+    open var videoGravity: String {
 
         get {
 
@@ -176,42 +147,36 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
-    public var backgroundColor: UIColor = UIColor.blackColor() {
+    open var videoNaturalSize: CGSize {
 
-        didSet {
-            self.view.backgroundColor = self.backgroundColor
-        }
+        let track = self.player?.currentItem?.asset.tracks(withMediaType: AVMediaTypeVideo).first
+
+        return track?.naturalSize ?? CGSize.zero
     }
 
-    public var videoNaturalSize: CGSize {
-
-        return self.player?.currentItem?.asset
-            .tracksWithMediaType(AVMediaTypeVideo).first?.naturalSize ?? CGSizeZero
-    }
-
-    public var duration: Double {
+    open var duration: Double {
 
         let duration = CMTimeGetSeconds(self.player?.currentItem?.duration ?? kCMTimeZero)
 
         return duration.isFinite ? duration : 0
     }
 
-    public var currentTime: Double {
+    open var currentTime: Double {
 
         let currentTime = CMTimeGetSeconds(self.player?.currentTime() ?? kCMTimeZero)
 
         return currentTime.isFinite ? currentTime : 0
     }
 
-    public var muted: Bool = false {
+    open var isMuted: Bool = false {
 
         didSet {
 
-            self.player?.muted = self.muted
+            self.player?.isMuted = self.isMuted
         }
     }
 
-    public var volume: Float = 1.0 {
+    open var volume: Float = 1.0 {
 
         didSet {
 
@@ -220,24 +185,17 @@ public class KKPlayerViewController: UIViewController {
     }
 
     /// Specifies whether the player automatically repeats if playback is ended.
-    public var repeatPlayback: Bool = false
+    open var repeatPlayback: Bool = false
 
-    public var minimumBufferDuration: Double = 5.0
+    open var allowsPictureInPicturePlayback = true
+
+    open var minimumBufferDuration: Double = 5.0
 
     /// The interval of calling playerViewControllerDidChangeCurrentTime delegate method.
     /// Specify the value as milliseconds.
-    public var intervalOfTimeObservation: Int = 500
+    open var intervalOfTimeObservation: Int = 500
 
-    public weak var delegate: KKPlayerViewControllerDelegate? {
-
-        didSet {
-
-            if #available(iOS 9.0, *) {
-
-//                self.avPlayerViewController.delegate = self.delegate
-            }
-        }
-    }
+    open weak var delegate: KKPlayerViewControllerDelegate?
 
     // MARK: Private properties
 
@@ -248,17 +206,17 @@ public class KKPlayerViewController: UIViewController {
 
         didSet {
 
-            self.player?.muted = self.muted
+            self.player?.isMuted = self.isMuted
             self.player?.volume = self.volume
         }
     }
 
-    private var playerView: KKPlayerView {
+    private var playerView: AVPlayerView {
 
-        return self.view as! KKPlayerView
+        return self.view as! AVPlayerView
     }
 
-    private var timeObserver: AnyObject?
+    private var timeObserver: Any?
 
     private var _pictureInPictureController: AnyObject?
     @available(iOS 9.0, *)
@@ -289,7 +247,7 @@ public class KKPlayerViewController: UIViewController {
         self.commonInit()
     }
 
-    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?) {
+    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
 
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         self.commonInit()
@@ -315,34 +273,23 @@ public class KKPlayerViewController: UIViewController {
 
     // MARK: UIViewController
 
-    public override func loadView() {
+    open override func loadView() {
 
-        let bundle = NSBundle(forClass: self.dynamicType)
-        let nib = UINib(nibName: "\(self.dynamicType)", bundle: bundle)
-        self.view = nib.instantiateWithOwner(self, options: nil).first as! KKPlayerView
+        let bundle = Bundle(for: type(of: self))
+        let nib = UINib(nibName: "\(type(of: self))", bundle: bundle)
+        self.view = nib.instantiate(withOwner: self, options: nil).first as! AVPlayerView
 
         self.playerView.playerLayer.addObserver(
             self,
             forKeyPath: playerLayerReadyForDisplayKey,
-            options: [.New],
+            options: [.new],
             context: &self.observationContext
         )
     }
 
-    public override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-
-        UIApplication.sharedApplication().beginReceivingRemoteControlEvents()
-        self.becomeFirstResponder()
-    }
-
-    public override func canBecomeFirstResponder() -> Bool {
-        return true
-    }
-
     // MARK: Public methods
 
-    public func clear() {
+    open func clear() {
 
         self.asset?.cancelLoading()
         self.asset = nil
@@ -351,7 +298,7 @@ public class KKPlayerViewController: UIViewController {
 
             playerItem.cancelPendingSeeks()
 
-            self.removePlayerItemObservers(playerItem)
+            self.removeObservers(from: playerItem)
         }
 
         self.playerItem = nil
@@ -360,23 +307,28 @@ public class KKPlayerViewController: UIViewController {
 
             player.cancelPendingPrerolls()
 
-            self.removePlayerObservers(player)
+            self.removeObservers(from: player)
         }
 
         self.player = nil
         self.playerView.player = nil
 
-        self.playerStatus = .Unknown
-        self.playbackStatus = .Unstarted
+        if #available(iOS 9.0, *) {
+
+            self.pictureInPictureController = nil
+        }
+
+        self.playerStatus = .unknown
+        self.playbackStatus = .unstarted
     }
 
-    public func load(url: NSURL) {
+    open func load(url url: URL) {
 
         self.clear()
-        self.setupAsset(url)
+        self.setupAsset(url: url)
     }
 
-    public func play(from seconds: Double? = nil) {
+    open func play(from seconds: Double? = nil) {
 
         guard let player = self.player else {
 
@@ -391,7 +343,7 @@ public class KKPlayerViewController: UIViewController {
         player.play()
     }
 
-    public func pause() {
+    open func pause() {
 
         guard let player = self.player else {
 
@@ -401,33 +353,30 @@ public class KKPlayerViewController: UIViewController {
         player.pause()
     }
 
-    public func seek(to seconds: Double) {
+    open func seek(to seconds: Double) {
 
         guard let player = self.player else {
 
             return
         }
 
-        let time = CMTime(
-            seconds: seconds,
-            preferredTimescale: Int32(NSEC_PER_SEC)
-        )
-        player.seekToTime(time)
+        let time = CMTimeMakeWithSeconds(seconds, 1)
+        player.seek(to: time)
     }
 
     // MARK: Private methods
 
-    private func setupAsset(url: NSURL) {
+    private func setupAsset(url url: URL) {
 
-        self.asset = AVURLAsset(URL: url, options: nil)
+        self.asset = AVURLAsset(url: url, options: nil)
 
         let keys = ["playable", "duration", "tracks"]
 
-        self.asset!.loadValuesAsynchronouslyForKeys(
-            keys,
+        self.asset!.loadValuesAsynchronously(
+            forKeys: keys,
             completionHandler: { [weak self] in
 
-                guard let `self` = self, asset = self.asset else {
+                guard let `self` = self, let asset = self.asset else {
 
                     return
                 }
@@ -435,59 +384,87 @@ public class KKPlayerViewController: UIViewController {
                 var error: NSError?
                 let failed = keys.filter {
 
-                    asset.statusOfValueForKey($0, error: &error) == .Failed
+                    asset.statusOfValue(forKey: $0, error: &error) == .failed
                 }
 
                 guard failed.isEmpty else {
 
-                    self.playerStatus = .Failed
+                    self.playerStatus = .failed
                     return
                 }
 
-                dispatch_async(
+                DispatchQueue.main.async { [weak self] in
 
-                    dispatch_get_main_queue(), { [weak self] in
-
-                        self?.setupPlayerItem(asset)
-                    }
-                )
+                    self?.setupPlayerItem(asset: asset)
+                }
             }
         )
     }
 
-    private func setupPlayerItem(asset: AVAsset) {
+    private func setupPlayerItem(asset asset: AVAsset) {
 
         self.playerItem = AVPlayerItem(asset: asset)
 
-        self.addPlayerItemObservers(self.playerItem!)
+        self.addObservers(to: self.playerItem!)
 
-        self.setupPlayer(self.playerItem!)
+        self.setupPlayer(playerItem: self.playerItem!)
     }
 
-    private func addPlayerItemObservers(playerItem: AVPlayerItem) {
+    private func setupPlayer(playerItem playerItem: AVPlayerItem) {
+
+        self.player = AVPlayer()
+
+        self.addObservers(to: self.player!)
+
+        self.player!.replaceCurrentItem(with: playerItem)
+
+        self.playerView.player = player
+
+        if #available(iOS 9.0, *) {
+
+            self.setupPictureInPictureController(playerLayer: self.playerView.playerLayer)
+        }
+    }
+
+    @available (iOS 9.0, *)
+    private func setupPictureInPictureController(playerLayer playerLayer: AVPlayerLayer) {
+
+        if AVPictureInPictureController.isPictureInPictureSupported() && self.allowsPictureInPicturePlayback {
+
+            self.pictureInPictureController = AVPictureInPictureController(playerLayer: playerLayer)
+        }
+        else {
+
+
+        }
+    }
+
+    // MARK: KVO
+
+    private func addObservers(to playerItem: AVPlayerItem) {
 
         playerItem.addObserver(
             self,
             forKeyPath: playerItemLoadedTimeRangesKey,
-            options: ([.New]),
+            options: ([.new]),
             context: &self.observationContext
         )
 
-        NSNotificationCenter.defaultCenter().addObserver(
+        NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerItemDidPlayToEndTime(_:)),
-            name: AVPlayerItemDidPlayToEndTimeNotification,
+            name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
             object: playerItem
         )
-        NSNotificationCenter.defaultCenter().addObserver(
+        NotificationCenter.default.addObserver(
             self,
             selector: #selector(playerItemPlaybackStalled(_:)),
-            name: AVPlayerItemPlaybackStalledNotification,
+            name: NSNotification.Name.AVPlayerItemPlaybackStalled,
             object: playerItem
         )
     }
 
-    private func removePlayerItemObservers(playerItem: AVPlayerItem) {
+    private func removeObservers(from playerItem: AVPlayerItem) {
 
         playerItem.removeObserver(
             self,
@@ -495,49 +472,38 @@ public class KKPlayerViewController: UIViewController {
             context: &self.observationContext
         )
 
-        NSNotificationCenter.defaultCenter().removeObserver(
+        NotificationCenter.default.removeObserver(
             self,
-            name: AVPlayerItemDidPlayToEndTimeNotification,
+            name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
             object: playerItem
         )
-        NSNotificationCenter.defaultCenter().removeObserver(
+        NotificationCenter.default.removeObserver(
             self,
-            name: AVPlayerItemPlaybackStalledNotification,
+            name: NSNotification.Name.AVPlayerItemPlaybackStalled,
             object: playerItem
         )
     }
 
-    private func setupPlayer(playerItem: AVPlayerItem) {
-
-        self.player = AVPlayer()
-
-        self.addPlayerObservers(self.player!)
-
-        self.player!.replaceCurrentItemWithPlayerItem(playerItem)
-
-        self.playerView.player = player
-    }
-
-    private func addPlayerObservers(player: AVPlayer) {
+    private func addObservers(to player: AVPlayer) {
 
         player.addObserver(
             self,
             forKeyPath: playerStatusKey,
-            options: ([.New]),
+            options: ([.new]),
             context: &self.observationContext
         )
         player.addObserver(
             self,
             forKeyPath: playerRateKey,
-            options: ([.New]),
+            options: ([.new]),
             context: &self.observationContext
         )
 
         let interval = CMTimeMake(1, 1000 / Int32(self.intervalOfTimeObservation))
-        self.timeObserver = player.addPeriodicTimeObserverForInterval(
-            interval,
-            queue: dispatch_get_main_queue(),
-            usingBlock: { [weak self] time in
+        self.timeObserver = player.addPeriodicTimeObserver(
+            forInterval: interval,
+            queue: DispatchQueue.main,
+            using: { [weak self] time in
 
                 guard let `self` = self else {
 
@@ -545,12 +511,13 @@ public class KKPlayerViewController: UIViewController {
                 }
 
                 let currentTime = CMTimeGetSeconds(time)
-                self.delegate?.playerViewControllerDidChangeCurrentTime?(self, currentTime: currentTime)
+
+                self.delegate?.playerViewController?(self, didChangeCurrentTime: currentTime)
             }
         )
     }
 
-    private func removePlayerObservers(player: AVPlayer) {
+    private func removeObservers(from player: AVPlayer) {
 
         player.removeObserver(
             self,
@@ -562,18 +529,16 @@ public class KKPlayerViewController: UIViewController {
             forKeyPath: playerRateKey,
             context: &self.observationContext
         )
-
+        
         player.removeTimeObserver(self.timeObserver!)
         self.timeObserver = nil
     }
 
-    // MARK: KVO
-
-    public override func observeValueForKeyPath(keyPath: String?, ofObject object: AnyObject?, change: [String : AnyObject]?, context: UnsafeMutablePointer<Void>) {
+    open override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
 
         guard context == &self.observationContext else {
 
-            super.observeValueForKeyPath(keyPath, ofObject: object, change: change, context: context)
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
             return
         }
 
@@ -586,17 +551,17 @@ public class KKPlayerViewController: UIViewController {
 
         case playerItemLoadedTimeRangesKey:
 
-            guard let playerItem = object as? AVPlayerItem
-                where self.playerItem == playerItem else {
+            guard let playerItem = object as? AVPlayerItem,
+                self.playerItem == playerItem else {
 
                 fatalError()
             }
 
-            if let timeRange = playerItem.loadedTimeRanges.first?.CMTimeRangeValue {
+            if let timeRange = playerItem.loadedTimeRanges.first?.timeRangeValue {
 
                 let duration = CMTimeGetSeconds(timeRange.duration)
 
-                if self.playbackStatus == .Stalled
+                if self.playbackStatus == .stalled
                     && duration >= self.minimumBufferDuration {
 
                     self.play()
@@ -605,8 +570,8 @@ public class KKPlayerViewController: UIViewController {
 
         case playerStatusKey:
 
-            guard let player = object as? AVPlayer
-                where self.player == player else {
+            guard let player = object as? AVPlayer,
+                self.player == player else {
 
                 fatalError()
             }
@@ -616,25 +581,25 @@ public class KKPlayerViewController: UIViewController {
         case playerRateKey:
 
             guard let player = object as? AVPlayer,
-                let currentItem = player.currentItem
-                where self.player == player else {
+                let currentItem = player.currentItem,
+                self.player == player else {
 
                 fatalError()
             }
 
             if fabs(player.rate) > 0 {
 
-                self.playbackStatus = .Playing
+                self.playbackStatus = .playing
             }
-            else if self.playbackStatus != .Unstarted {
+            else if self.playbackStatus != .unstarted {
 
-                if !currentItem.playbackLikelyToKeepUp {
+                if !currentItem.isPlaybackLikelyToKeepUp {
 
                     // Do nothing. PlaybackStatus will be Stalled.
                 }
                 else if player.currentTime() < currentItem.duration {
 
-                    self.playbackStatus = .Paused
+                    self.playbackStatus = .paused
                 }
                 else {
 
@@ -644,13 +609,13 @@ public class KKPlayerViewController: UIViewController {
             
         case playerLayerReadyForDisplayKey:
 
-            guard let playerLayer = object as? AVPlayerLayer
-                where self.playerView.playerLayer == playerLayer else {
+            guard let playerLayer = object as? AVPlayerLayer,
+                self.playerView.playerLayer == playerLayer else {
 
                 fatalError()
             }
 
-            if playerLayer.readyForDisplay {
+            if playerLayer.isReadyForDisplay {
 
                 self.delegate?.playerViewControllerDidReadyForDisplay(self)
             }
@@ -663,9 +628,9 @@ public class KKPlayerViewController: UIViewController {
 
     // MARK: AVPlayerItem notifications
 
-    public func playerItemDidPlayToEndTime(notification: NSNotification) {
+    open func playerItemDidPlayToEndTime(_ notification: Notification) {
 
-        self.playbackStatus = .Ended
+        self.playbackStatus = .ended
 
         if self.repeatPlayback {
 
@@ -673,44 +638,44 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
-    public func playerItemPlaybackStalled(notification: NSNotification) {
+    open func playerItemPlaybackStalled(_ notification: Notification) {
 
-        self.playbackStatus = .Stalled
+        self.playbackStatus = .stalled
     }
 
     // MARK: UIApplication notifications
 
     private func addApplicationNotificationObservers() {
 
-        NSNotificationCenter.defaultCenter().addObserver(
+        NotificationCenter.default.addObserver(
             self,
             selector: #selector(applicationDidEnterBackground(_:)),
-            name: UIApplicationDidEnterBackgroundNotification,
+            name: NSNotification.Name.UIApplicationDidEnterBackground,
             object: nil
         )
-        NSNotificationCenter.defaultCenter().addObserver(
+        NotificationCenter.default.addObserver(
             self,
             selector: #selector(applicationWillEnterForeground(_:)),
-            name: UIApplicationWillEnterForegroundNotification,
+            name: NSNotification.Name.UIApplicationWillEnterForeground,
             object: nil
         )
     }
 
     private func removeApplicationNotificationObservers() {
 
-        NSNotificationCenter.defaultCenter().removeObserver(
+        NotificationCenter.default.removeObserver(
             self,
-            name: UIApplicationDidEnterBackgroundNotification,
+            name: NSNotification.Name.UIApplicationDidEnterBackground,
             object: nil
         )
-        NSNotificationCenter.defaultCenter().removeObserver(
+        NotificationCenter.default.removeObserver(
             self,
-            name: UIApplicationWillEnterForegroundNotification,
+            name: NSNotification.Name.UIApplicationWillEnterForeground,
             object: nil
         )
     }
 
-    func applicationDidEnterBackground(notification: NSNotification) {
+    func applicationDidEnterBackground(_ notification: Notification) {
 
         func remove() {
 
@@ -719,8 +684,8 @@ public class KKPlayerViewController: UIViewController {
 
         if #available(iOS 9.0, *) {
 
-            if AVPictureInPictureController.isPictureInPictureSupported() {
-//                && self.allowsPictureInPicturePlayback {
+            if AVPictureInPictureController.isPictureInPictureSupported()
+                && self.allowsPictureInPicturePlayback {
 
                 // Do nothing. Keep the reference from AVPlayerViewController for Picture in Picture.
             }
@@ -735,49 +700,11 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
-    func applicationWillEnterForeground(notification: NSNotification) {
+    func applicationWillEnterForeground(_ notification: Notification) {
 
         // Refer again for case of background playback
         self.playerView.player = self.player
     }
-
-    // MARK: Remote control
-//
-//    override public func remoteControlReceivedWithEvent(event: UIEvent?) {
-//
-//        guard let event = event
-//            where event.type == .RemoteControl else {
-//
-//            return
-//        }
-//
-//        print(event)
-//
-//        switch event.subtype {
-//
-//        case .RemoteControlPause,
-//             .RemoteControlPlay,
-//             .RemoteControlTogglePlayPause:
-//
-//            guard let player = self.player else {
-//
-//                return
-//            }
-//
-//            if playbackStatus == .Playing {
-//
-//                player.pause()
-//            }
-//            else if playbackStatus == .Paused {
-//
-//                player.play()
-//            }
-//            
-//        default:
-//            
-//            break
-//        }
-//    }
 }
 
 // MARK: Private KVO keys

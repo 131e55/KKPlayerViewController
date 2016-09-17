@@ -12,16 +12,19 @@ import AVFoundation
 
 class ViewController: UIViewController {
 
-    let url = NSURL(string:"https://video.twimg.com/ext_tw_video/768701846240104449/pu/vid/720x1280/FW9MWNMhhdKfdygm.mp4")!
+    let url = URL(string:"https://video.twimg.com/ext_tw_video/768701846240104449/pu/vid/720x1280/FW9MWNMhhdKfdygm.mp4")!
+
+    var playerViewController: KKPlayerViewController {
+
+        return self.childViewControllers.first as! KKPlayerViewController
+    }
 
     override func viewDidLoad() {
 
         super.viewDidLoad()
 
-        let playerViewController = self.childViewControllers.first as! KKPlayerViewController
-        playerViewController.backgroundColor = UIColor.clearColor()
-        playerViewController.delegate = self
-        playerViewController.load(self.url)
+        self.playerViewController.delegate = self
+        self.playerViewController.load(url: self.url)
 
         // Prepare for background playback or Picture in Picture
         let audioSession = AVAudioSession.sharedInstance()
@@ -36,19 +39,18 @@ class ViewController: UIViewController {
 
 extension ViewController: KKPlayerViewControllerDelegate {
 
-    func playerViewControllerDidChangePlayerStatus(playerViewController: KKPlayerViewController, status: PlayerStatus) {
+    public func playerViewController(_ playerViewController: KKPlayerViewController, didChangePlayerStatus status: PlayerStatus) {
 
         print(status)
     }
 
-    func playerViewControllerDidChangePlaybackStatus(playerViewController: KKPlayerViewController, status: PlaybackStatus) {
+    func playerViewController(_ playerViewController: KKPlayerViewController, didChangePlaybackStatus status: PlaybackStatus) {
 
         print(status)
     }
 
-    func playerViewControllerDidReadyForDisplay(playerViewController: KKPlayerViewController) {
+    func playerViewControllerDidReadyForDisplay(_ playerViewController: KKPlayerViewController) {
 
         playerViewController.play()
-        playerViewController.showsPlaybackControls = true
     }
 }

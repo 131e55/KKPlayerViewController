@@ -1,6 +1,6 @@
 //
-//  KKPlayerView.swift
-//  Pods
+//  AVPlayerView.swift
+//  KKPlayerViewController
 //
 //  Created by 131e55 on 2016/09/06.
 //
@@ -9,7 +9,7 @@
 import UIKit
 import AVFoundation
 
-internal class KKPlayerView: UIView {
+internal class AVPlayerView: UIView {
 
     var player: AVPlayer? {
 
@@ -25,10 +25,10 @@ internal class KKPlayerView: UIView {
 
     var playerLayer: AVPlayerLayer {
 
-        return self.layer as! AVPlayerLayer
+        return layer as! AVPlayerLayer
     }
 
-    override class func layerClass() -> AnyClass {
+    override static var layerClass: AnyClass {
 
         return AVPlayerLayer.self
     }
