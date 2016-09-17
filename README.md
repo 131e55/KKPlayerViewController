@@ -1,6 +1,7 @@
 # KKPlayerViewController
 
-KKPlayerViewController is a video player library for easier and more convenient to use AVPlayerViewController.
+KKPlayerViewController is a video player library written in Swift 3 for easier and more convenient to use AVPlayer.
+Support background playback and Picture in Picture.
 
 ## :sunny: Features
 
@@ -8,9 +9,7 @@ KKPlayerViewController is a video player library for easier and more convenient 
 - Load video data asynchronously
 - Easily manage playback status
 - Background playback
-- AVPlayerViewController features
-    - System playback controls
-    - Picture in Picture (iPad, iOS 9.0+)
+- Picture in Picture (iPad, iOS 9.0+)
 - And more
 
 ## :book: Usage
