@@ -322,7 +322,7 @@ open class KKPlayerViewController: UIViewController {
         self.playbackStatus = .unstarted
     }
 
-    open func load(url url: URL) {
+    open func load(url: URL) {
 
         self.clear()
         self.setupAsset(url: url)
@@ -366,7 +366,7 @@ open class KKPlayerViewController: UIViewController {
 
     // MARK: Private methods
 
-    private func setupAsset(url url: URL) {
+    private func setupAsset(url: URL) {
 
         self.asset = AVURLAsset(url: url, options: nil)
 
@@ -401,7 +401,7 @@ open class KKPlayerViewController: UIViewController {
         )
     }
 
-    private func setupPlayerItem(asset asset: AVAsset) {
+    private func setupPlayerItem(asset: AVAsset) {
 
         self.playerItem = AVPlayerItem(asset: asset)
 
@@ -410,7 +410,7 @@ open class KKPlayerViewController: UIViewController {
         self.setupPlayer(playerItem: self.playerItem!)
     }
 
-    private func setupPlayer(playerItem playerItem: AVPlayerItem) {
+    private func setupPlayer(playerItem: AVPlayerItem) {
 
         self.player = AVPlayer()
 
@@ -427,7 +427,7 @@ open class KKPlayerViewController: UIViewController {
     }
 
     @available (iOS 9.0, *)
-    private func setupPictureInPictureController(playerLayer playerLayer: AVPlayerLayer) {
+    private func setupPictureInPictureController(playerLayer: AVPlayerLayer) {
 
         if AVPictureInPictureController.isPictureInPictureSupported() && self.allowsPictureInPicturePlayback {
 

@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'KKPlayerViewController'
   s.version          = '0.7'
-  s.summary          = 'A video player library written in Swift 3 for easier and more convenient to use AVPlayer. Support background playback and Picture in Picture.'
+  s.summary          = 'A video player library written in Swift 3 for easier to use AVPlayer. Support background playback and Picture in Picture.'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
