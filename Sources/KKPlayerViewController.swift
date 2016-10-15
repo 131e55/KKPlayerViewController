@@ -563,7 +563,7 @@ open class KKPlayerViewController: UIViewController {
             guard let playerItem = object as? AVPlayerItem,
                 self.playerItem == playerItem else {
 
-                fatalError()
+                    fatalError()
             }
 
             if let timeRange = playerItem.loadedTimeRanges.first?.timeRangeValue {
@@ -582,7 +582,7 @@ open class KKPlayerViewController: UIViewController {
             guard let player = object as? AVPlayer,
                 self.player == player else {
 
-                fatalError()
+                    fatalError()
             }
 
             self.playerStatus = PlayerStatus(rawValue: player.status.rawValue)!
@@ -593,7 +593,7 @@ open class KKPlayerViewController: UIViewController {
                 let currentItem = player.currentItem,
                 self.player == player else {
 
-                fatalError()
+                    fatalError()
             }
 
             if fabs(player.rate) > 0 {
@@ -621,7 +621,7 @@ open class KKPlayerViewController: UIViewController {
             guard let playerLayer = object as? AVPlayerLayer,
                 self.playerView.playerLayer == playerLayer else {
 
-                fatalError()
+                    fatalError()
             }
 
             if playerLayer.isReadyForDisplay {
