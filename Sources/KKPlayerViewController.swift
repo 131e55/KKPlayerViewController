@@ -327,10 +327,10 @@ open class KKPlayerViewController: UIViewController {
         self.playbackStatus = .unstarted
     }
 
-    open func load(url: URL) {
+    open func load(url: URL, from seconds: Double = 0) {
 
         self.clear()
-        self.setupAsset(url: url)
+        self.setupAsset(url: url, from: seconds)
     }
 
     open func play(from seconds: Double? = nil) {
@@ -371,7 +371,7 @@ open class KKPlayerViewController: UIViewController {
 
     // MARK: Private methods
 
-    private func setupAsset(url: URL) {
+    private func setupAsset(url: URL, from seconds: Double = 0) {
 
         DispatchQueue.global().async {
 
@@ -400,19 +400,25 @@ open class KKPlayerViewController: UIViewController {
                         return
                     }
 
-                    self.setupPlayerItem(asset: asset)
+                    self.setupPlayerItem(asset: asset, from: seconds)
                 }
             )
         }
     }
 
-    private func setupPlayerItem(asset: AVAsset) {
+    private func setupPlayerItem(asset: AVAsset, from seconds: Double = 0) {
 
-        self.playerItem = AVPlayerItem(asset: asset)
+        DispatchQueue.main.async {
 
-        self.addObservers(to: self.playerItem!)
+            self.playerItem = AVPlayerItem(asset: asset)
 
-        self.setupPlayer(playerItem: self.playerItem!)
+            let time = CMTimeMakeWithSeconds(seconds, 1)
+            self.playerItem!.seek(to: time)
+
+            self.addObservers(to: self.playerItem!)
+
+            self.setupPlayer(playerItem: self.playerItem!)
+        }
     }
 
     private func setupPlayer(playerItem: AVPlayerItem) {
