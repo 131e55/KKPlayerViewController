@@ -108,8 +108,10 @@ open class KKPlayerViewController: UIViewController {
 
             if self.playerStatus != oldValue {
 
+                DispatchQueue.main.async {
 
-                self.delegate?.playerViewController(self, didChangePlayerStatus: self.playerStatus)
+                    self.delegate?.playerViewController(self, didChangePlayerStatus: self.playerStatus)
+                }
             }
         }
     }
@@ -120,7 +122,10 @@ open class KKPlayerViewController: UIViewController {
 
             if self.playbackStatus != oldValue {
 
-                self.delegate?.playerViewController(self, didChangePlaybackStatus: self.playbackStatus)
+                DispatchQueue.main.async {
+
+                    self.delegate?.playerViewController(self, didChangePlaybackStatus: self.playbackStatus)
+                }
             }
         }
     }
@@ -291,35 +296,38 @@ open class KKPlayerViewController: UIViewController {
 
     open func clear() {
 
-        self.asset?.cancelLoading()
-        self.asset = nil
+        DispatchQueue.global().async {
 
-        if let playerItem = self.playerItem {
+            self.asset?.cancelLoading()
+            self.asset = nil
 
-            playerItem.cancelPendingSeeks()
+            if let playerItem = self.playerItem {
 
-            self.removeObservers(from: playerItem)
+                playerItem.cancelPendingSeeks()
+
+                self.removeObservers(from: playerItem)
+            }
+
+            self.playerItem = nil
+
+            if let player = self.player {
+
+                player.cancelPendingPrerolls()
+
+                self.removeObservers(from: player)
+            }
+
+            self.playerView.player = nil
+            self.player = nil
+
+            if #available(iOS 9.0, *) {
+
+                self.pictureInPictureController = nil
+            }
+
+            self.playerStatus = .unknown
+            self.playbackStatus = .unstarted
         }
-
-        self.playerItem = nil
-
-        if let player = self.player {
-
-            player.cancelPendingPrerolls()
-
-            self.removeObservers(from: player)
-        }
-
-        self.player = nil
-        self.playerView.player = nil
-
-        if #available(iOS 9.0, *) {
-
-            self.pictureInPictureController = nil
-        }
-
-        self.playerStatus = .unknown
-        self.playbackStatus = .unstarted
     }
 
     open func load(url: URL) {
@@ -368,37 +376,37 @@ open class KKPlayerViewController: UIViewController {
 
     private func setupAsset(url: URL) {
 
-        self.asset = AVURLAsset(url: url, options: nil)
+        DispatchQueue.global().async {
 
-        let keys = ["playable", "duration", "tracks"]
+            self.asset = AVURLAsset(url: url, options: nil)
 
-        self.asset!.loadValuesAsynchronously(
-            forKeys: keys,
-            completionHandler: { [weak self] in
+            let keys = ["playable", "duration"]
 
-                guard let `self` = self, let asset = self.asset else {
+            self.asset!.loadValuesAsynchronously(
+                forKeys: keys,
+                completionHandler: { [weak self] in
 
-                    return
+                    guard let `self` = self, let asset = self.asset else {
+
+                        return
+                    }
+
+                    var error: NSError?
+                    let failed = keys.filter {
+
+                        asset.statusOfValue(forKey: $0, error: &error) == .failed
+                    }
+
+                    guard failed.isEmpty else {
+
+                        self.playerStatus = .failed
+                        return
+                    }
+
+                    self.setupPlayerItem(asset: asset)
                 }
-
-                var error: NSError?
-                let failed = keys.filter {
-
-                    asset.statusOfValue(forKey: $0, error: &error) == .failed
-                }
-
-                guard failed.isEmpty else {
-
-                    self.playerStatus = .failed
-                    return
-                }
-
-                DispatchQueue.main.async { [weak self] in
-
-                    self?.setupPlayerItem(asset: asset)
-                }
-            }
-        )
+            )
+        }
     }
 
     private func setupPlayerItem(asset: AVAsset) {
@@ -412,17 +420,18 @@ open class KKPlayerViewController: UIViewController {
 
     private func setupPlayer(playerItem: AVPlayerItem) {
 
-        self.player = AVPlayer()
+        DispatchQueue.main.async {
 
-        self.addObservers(to: self.player!)
+            self.player = AVPlayer(playerItem: playerItem)
 
-        self.player!.replaceCurrentItem(with: playerItem)
+            self.addObservers(to: self.player!)
 
-        self.playerView.player = player
+            self.playerView.player = self.player
 
-        if #available(iOS 9.0, *) {
+            if #available(iOS 9.0, *) {
 
-            self.setupPictureInPictureController(playerLayer: self.playerView.playerLayer)
+                self.setupPictureInPictureController(playerLayer: self.playerView.playerLayer)
+            }
         }
     }
 
