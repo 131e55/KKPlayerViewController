@@ -287,7 +287,7 @@ open class KKPlayerViewController: UIViewController {
         self.playerView.playerLayer.addObserver(
             self,
             forKeyPath: playerLayerReadyForDisplayKey,
-            options: [.new],
+            options: [.initial, .new],
             context: &self.observationContext
         )
     }
@@ -455,19 +455,19 @@ open class KKPlayerViewController: UIViewController {
         playerItem.addObserver(
             self,
             forKeyPath: playerItemLoadedTimeRangesKey,
-            options: ([.new]),
+            options: ([.initial, .new]),
             context: &self.observationContext
         )
 
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(playerItemDidPlayToEndTime(_:)),
+            selector: #selector(self.playerItemDidPlayToEndTime(_:)),
             name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
             object: playerItem
         )
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(playerItemPlaybackStalled(_:)),
+            selector: #selector(self.playerItemPlaybackStalled(_:)),
             name: NSNotification.Name.AVPlayerItemPlaybackStalled,
             object: playerItem
         )
@@ -498,13 +498,13 @@ open class KKPlayerViewController: UIViewController {
         player.addObserver(
             self,
             forKeyPath: playerStatusKey,
-            options: ([.new]),
+            options: ([.initial, .new]),
             context: &self.observationContext
         )
         player.addObserver(
             self,
             forKeyPath: playerRateKey,
-            options: ([.new]),
+            options: ([.initial, .new]),
             context: &self.observationContext
         )
 
