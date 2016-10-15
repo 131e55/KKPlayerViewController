@@ -296,38 +296,35 @@ open class KKPlayerViewController: UIViewController {
 
     open func clear() {
 
-        DispatchQueue.global().async {
+        self.asset?.cancelLoading()
+        self.asset = nil
 
-            self.asset?.cancelLoading()
-            self.asset = nil
+        if let playerItem = self.playerItem {
 
-            if let playerItem = self.playerItem {
+            playerItem.cancelPendingSeeks()
 
-                playerItem.cancelPendingSeeks()
-
-                self.removeObservers(from: playerItem)
-            }
-
-            self.playerItem = nil
-
-            if let player = self.player {
-
-                player.cancelPendingPrerolls()
-
-                self.removeObservers(from: player)
-            }
-
-            self.playerView.player = nil
-            self.player = nil
-
-            if #available(iOS 9.0, *) {
-
-                self.pictureInPictureController = nil
-            }
-
-            self.playerStatus = .unknown
-            self.playbackStatus = .unstarted
+            self.removeObservers(from: playerItem)
         }
+
+        self.playerItem = nil
+
+        if let player = self.player {
+
+            player.cancelPendingPrerolls()
+
+            self.removeObservers(from: player)
+        }
+
+        self.playerView.player = nil
+        self.player = nil
+
+        if #available(iOS 9.0, *) {
+
+            self.pictureInPictureController = nil
+        }
+
+        self.playerStatus = .unknown
+        self.playbackStatus = .unstarted
     }
 
     open func load(url: URL) {
