@@ -124,36 +124,6 @@ public class KKPlayerViewController: UIViewController {
         }
     }
 
-//    public var showsPlaybackControls: Bool {
-//
-//        get {
-//
-//            return self.avPlayerViewController.showsPlaybackControls
-//        }
-//        set {
-//
-//            self.avPlayerViewController.showsPlaybackControls = newValue
-//        }
-//    }
-
-//    @available(iOS 9.0, *)
-//    public var allowsPictureInPicturePlayback: Bool {
-//
-//        get {
-//
-//            return self.avPlayerViewController.allowsPictureInPicturePlayback
-//        }
-//        set {
-//
-//            self.avPlayerViewController.allowsPictureInPicturePlayback = newValue
-//        }
-//    }
-
-//    public var contentOverlayView: UIView? {
-//
-//        return self.avPlayerViewController.contentOverlayView
-//    }
-//
     public var readyForDisplay: Bool {
 
         return self.playerView.playerLayer.readyForDisplay
@@ -228,16 +198,7 @@ public class KKPlayerViewController: UIViewController {
     /// Specify the value as milliseconds.
     public var intervalOfTimeObservation: Int = 500
 
-    public weak var delegate: KKPlayerViewControllerDelegate? {
-
-        didSet {
-
-            if #available(iOS 9.0, *) {
-
-//                self.avPlayerViewController.delegate = self.delegate
-            }
-        }
-    }
+    public weak var delegate: KKPlayerViewControllerDelegate?
 
     // MARK: Private properties
 
@@ -421,7 +382,7 @@ public class KKPlayerViewController: UIViewController {
 
         self.asset = AVURLAsset(URL: url, options: nil)
 
-        let keys = ["playable", "duration", "tracks"]
+        let keys = ["playable", "duration"]
 
         self.asset!.loadValuesAsynchronouslyForKeys(
             keys,
@@ -509,11 +470,9 @@ public class KKPlayerViewController: UIViewController {
 
     private func setupPlayer(playerItem: AVPlayerItem) {
 
-        self.player = AVPlayer()
+        self.player = AVPlayer(playerItem: playerItem)
 
         self.addPlayerObservers(self.player!)
-
-        self.player!.replaceCurrentItemWithPlayerItem(playerItem)
 
         self.playerView.player = player
     }
@@ -523,13 +482,13 @@ public class KKPlayerViewController: UIViewController {
         player.addObserver(
             self,
             forKeyPath: playerStatusKey,
-            options: ([.New]),
+            options: ([.Initial, .New]),
             context: &self.observationContext
         )
         player.addObserver(
             self,
             forKeyPath: playerRateKey,
-            options: ([.New]),
+            options: ([.Initial, .New]),
             context: &self.observationContext
         )
 
@@ -615,8 +574,7 @@ public class KKPlayerViewController: UIViewController {
 
         case playerRateKey:
 
-            guard let player = object as? AVPlayer,
-                let currentItem = player.currentItem
+            guard let player = object as? AVPlayer
                 where self.player == player else {
 
                 fatalError()
@@ -626,7 +584,8 @@ public class KKPlayerViewController: UIViewController {
 
                 self.playbackStatus = .Playing
             }
-            else if self.playbackStatus != .Unstarted {
+            else if let currentItem = player.currentItem
+                where self.playbackStatus != .Unstarted {
 
                 if !currentItem.playbackLikelyToKeepUp {
 
@@ -640,6 +599,10 @@ public class KKPlayerViewController: UIViewController {
 
                     // Do nothing. PlaybackStatus will be Ended.
                 }
+            }
+            else {
+
+                self.playbackStatus = .Unstarted
             }
             
         case playerLayerReadyForDisplayKey:
@@ -720,7 +683,7 @@ public class KKPlayerViewController: UIViewController {
         if #available(iOS 9.0, *) {
 
             if AVPictureInPictureController.isPictureInPictureSupported() {
-//                && self.allowsPictureInPicturePlayback {
+                //&& self.allowsPictureInPicturePlayback {
 
                 // Do nothing. Keep the reference from AVPlayerViewController for Picture in Picture.
             }
@@ -740,44 +703,6 @@ public class KKPlayerViewController: UIViewController {
         // Refer again for case of background playback
         self.playerView.player = self.player
     }
-
-    // MARK: Remote control
-//
-//    override public func remoteControlReceivedWithEvent(event: UIEvent?) {
-//
-//        guard let event = event
-//            where event.type == .RemoteControl else {
-//
-//            return
-//        }
-//
-//        print(event)
-//
-//        switch event.subtype {
-//
-//        case .RemoteControlPause,
-//             .RemoteControlPlay,
-//             .RemoteControlTogglePlayPause:
-//
-//            guard let player = self.player else {
-//
-//                return
-//            }
-//
-//            if playbackStatus == .Playing {
-//
-//                player.pause()
-//            }
-//            else if playbackStatus == .Paused {
-//
-//                player.play()
-//            }
-//            
-//        default:
-//            
-//            break
-//        }
-//    }
 }
 
 // MARK: Private KVO keys
