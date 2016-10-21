@@ -108,10 +108,7 @@ open class KKPlayerViewController: UIViewController {
 
             if self.playerStatus != oldValue {
 
-                DispatchQueue.main.async {
-
-                    self.delegate?.playerViewController(self, didChangePlayerStatus: self.playerStatus)
-                }
+                self.delegate?.playerViewController(self, didChangePlayerStatus: self.playerStatus)
             }
         }
     }
@@ -122,10 +119,7 @@ open class KKPlayerViewController: UIViewController {
 
             if self.playbackStatus != oldValue {
 
-                DispatchQueue.main.async {
-
-                    self.delegate?.playerViewController(self, didChangePlaybackStatus: self.playbackStatus)
-                }
+                self.delegate?.playerViewController(self, didChangePlaybackStatus: self.playbackStatus)
             }
         }
     }
