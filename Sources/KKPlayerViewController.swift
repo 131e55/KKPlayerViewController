@@ -323,7 +323,6 @@ open class KKPlayerViewController: UIViewController {
 
     open func load(url: URL, from seconds: Double = 0) {
 
-        self.clear()
         self.setupAsset(url: url, from: seconds)
     }
 
@@ -404,6 +403,11 @@ open class KKPlayerViewController: UIViewController {
 
         DispatchQueue.main.async {
 
+            if let playerItem = self.playerItem {
+
+                self.removeObservers(from: playerItem)
+            }
+
             self.playerItem = AVPlayerItem(asset: asset)
 
             let time = CMTimeMakeWithSeconds(seconds, 1)
@@ -419,15 +423,22 @@ open class KKPlayerViewController: UIViewController {
 
         DispatchQueue.main.async {
 
-            self.player = AVPlayer(playerItem: playerItem)
+            if let player = self.player {
 
-            self.addObservers(to: self.player!)
+                player.replaceCurrentItem(with: playerItem)
+            }
+            else {
 
-            self.playerView.player = self.player
+                self.player = AVPlayer(playerItem: playerItem)
 
-            if #available(iOS 9.0, *) {
+                self.addObservers(to: self.player!)
 
-                self.setupPictureInPictureController(playerLayer: self.playerView.playerLayer)
+                self.playerView.player = self.player
+
+                if #available(iOS 9.0, *) {
+
+                    self.setupPictureInPictureController(playerLayer: self.playerView.playerLayer)
+                }
             }
         }
     }
@@ -435,14 +446,13 @@ open class KKPlayerViewController: UIViewController {
     @available (iOS 9.0, *)
     private func setupPictureInPictureController(playerLayer: AVPlayerLayer) {
 
-        if AVPictureInPictureController.isPictureInPictureSupported() && self.allowsPictureInPicturePlayback {
+        guard AVPictureInPictureController.isPictureInPictureSupported()
+            && self.allowsPictureInPicturePlayback else {
 
-            self.pictureInPictureController = AVPictureInPictureController(playerLayer: playerLayer)
+                return
         }
-        else {
 
-
-        }
+        self.pictureInPictureController = AVPictureInPictureController(playerLayer: playerLayer)
     }
 
     // MARK: KVO
