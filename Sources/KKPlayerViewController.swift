@@ -587,7 +587,6 @@ open class KKPlayerViewController: UIViewController {
         case playerRateKey:
 
             guard let player = object as? AVPlayer,
-                let currentItem = player.currentItem,
                 self.player == player else {
 
                     fatalError()
@@ -597,7 +596,8 @@ open class KKPlayerViewController: UIViewController {
 
                 self.playbackStatus = .playing
             }
-            else if self.playbackStatus != .unstarted {
+            else if let currentItem = player.currentItem,
+                self.playbackStatus != .unstarted {
 
                 if !currentItem.isPlaybackLikelyToKeepUp {
 
@@ -612,7 +612,11 @@ open class KKPlayerViewController: UIViewController {
                     // Do nothing. PlaybackStatus will be Ended.
                 }
             }
-            
+            else {
+
+                self.playbackStatus = .unstarted
+            }
+
         case playerLayerReadyForDisplayKey:
 
             guard let playerLayer = object as? AVPlayerLayer,
