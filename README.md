@@ -14,18 +14,16 @@ Support background playback and Picture in Picture.
 
 ## :book: Usage
 
-### Basic
-
 1. Create KKPlayerViewController instance.
 2. Add as container view to your view controller. (More info: [View Controller Programming Guide for iOS](https://developer.apple.com/library/ios/featuredarticles/ViewControllerPGforiPhoneOS/ImplementingaContainerViewController.html#//apple_ref/doc/uid/TP40007457-CH11-SW1))
-3. Implement KKPlayerViewControllerDelegate
-4. Setup KKPlayerViewController
+3. Implement KKPlayerViewControllerDelegate.
+4. Load video.
 5. If ready for display, play a video.
 
 ```swift
 class ViewController: UIViewController {
 
-    let url = NSURL(string:"https://video.twimg.com/ext_tw_video/768701846240104449/pu/vid/720x1280/FW9MWNMhhdKfdygm.mp4")!
+    let url = URL(string:"https://video.twimg.com/ext_tw_video/768701846240104449/pu/vid/720x1280/FW9MWNMhhdKfdygm.mp4")!
 
     var playerViewController: KKPlayerViewController!
 
@@ -41,25 +39,26 @@ class ViewController: UIViewController {
         self.addChildViewController(self.playerViewController)
         self.playerViewController.view.frame = self.view.bounds
         self.view.addSubview(self.playerViewController.view)
-        self.playerViewController.didMoveToParentViewController(self)
+        self.playerViewController.didMove(toParentViewController: self)
 
         // 3.
         self.playerViewController.delegate = self
 
         // 4.
-        self.playerViewController.setup(url)
+        self.playerViewController.load(url: url)
     }
 }
 
 extension ViewController: KKPlayerViewControllerDelegate {
-    func playerViewControllerDidChangePlayerStatus(playerViewController: KKPlayerViewController, status: PlayerStatus) {
+    func playerViewController(_ playerViewController: KKPlayerViewController, didChangePlayerStatus status: PlayerStatus) {
+
     }
 
-    func playerViewControllerDidChangePlaybackStatus(playerViewController: KKPlayerViewController, status: PlaybackStatus) {
+    func playerViewController(_ playerViewController: KKPlayerViewController, didChangePlaybackStatus status: PlaybackStatus) {
+
     }
 
-    func playerViewControllerDidReadyForDisplay(playerViewController: KKPlayerViewController) {
-
+    func playerViewControllerDidReadyForDisplay(_ playerViewController: KKPlayerViewController) {
         // 5.
         playerViewController.play()
     }
@@ -80,10 +79,6 @@ target 'YOUR_TARGET_NAME' do
   pod 'KKPlayerViewController'
 end
 ```
-
-### Manual
-
-Copy `Sources/KKPlayerViewController.swift` into your Xcode project.
 
 ## :cat: Author
 
